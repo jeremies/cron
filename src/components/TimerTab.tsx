@@ -12,6 +12,7 @@ interface TimerTabProps {
   setActiveTimerId: (id: string) => void;
   onToggleTimer: (id: string) => void;
   onResetTimer: (id: string) => void;
+  onClearTimer: (id: string) => void;
   onAddSeconds: (id: string, seconds: number) => void;
   onCreateTimer: (label: string, totalSeconds: number, sound: SoundType) => void;
   onUpdateTimer: (id: string, label: string, totalSeconds: number, sound: SoundType) => void;
@@ -24,6 +25,7 @@ export const TimerTab: React.FC<TimerTabProps> = ({
   setActiveTimerId,
   onToggleTimer,
   onResetTimer,
+  onClearTimer,
   onAddSeconds,
   onCreateTimer,
   onUpdateTimer,
@@ -36,6 +38,7 @@ export const TimerTab: React.FC<TimerTabProps> = ({
 
   const handlePlayPause = () => {
     if (!activeTimer) return;
+    if (activeTimer.remainingSeconds === 0 && activeTimer.totalSeconds === 0) return;
     vibrationService.tap();
     audioService.playClick();
     onToggleTimer(activeTimer.id);
@@ -48,6 +51,13 @@ export const TimerTab: React.FC<TimerTabProps> = ({
     onResetTimer(activeTimer.id);
   };
 
+  const handleClear = () => {
+    if (!activeTimer) return;
+    vibrationService.tap();
+    audioService.playClick();
+    onClearTimer(activeTimer.id);
+  };
+
   const handleAddQuickTime = (seconds: number) => {
     if (!activeTimer) return;
     vibrationService.tap();
@@ -56,11 +66,12 @@ export const TimerTab: React.FC<TimerTabProps> = ({
   };
 
   const formatted = activeTimer ? formatSeconds(activeTimer.remainingSeconds) : { display: '0:00' };
+  const isZero = !activeTimer || (activeTimer.remainingSeconds === 0 && activeTimer.totalSeconds === 0);
 
   // Calculate percentage remaining for the progress ring / line
   const progressPercent = activeTimer && activeTimer.totalSeconds > 0
     ? Math.max(0, Math.min(100, (activeTimer.remainingSeconds / activeTimer.totalSeconds) * 100))
-    : 100;
+    : 0;
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-6">
@@ -116,25 +127,33 @@ export const TimerTab: React.FC<TimerTabProps> = ({
             />
           </button>
 
-          {/* Quick Add Chips: +0:30, +1:00, +5:00 */}
-          <div className="flex items-center gap-2.5 sm:gap-3 mt-6 sm:mt-8">
+          {/* Quick Add Chips: +0:30, +1:00, +5:00, Clear */}
+          <div className="flex items-center gap-2 sm:gap-3 mt-6 sm:mt-8">
             <button
               onClick={() => handleAddQuickTime(30)}
-              className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#e8f0fe] text-[#1a73e8] dark:bg-[#004a77] dark:text-[#c2e7ff] hover:bg-[#d2e3fc] dark:hover:bg-[#005a92] active:scale-95 transition-all shadow-xs"
+              className="px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#e8f0fe] text-[#1a73e8] dark:bg-[#004a77] dark:text-[#c2e7ff] hover:bg-[#d2e3fc] dark:hover:bg-[#005a92] active:scale-95 transition-all shadow-xs"
             >
               +0:30
             </button>
             <button
               onClick={() => handleAddQuickTime(60)}
-              className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#e8f0fe] text-[#1a73e8] dark:bg-[#004a77] dark:text-[#c2e7ff] hover:bg-[#d2e3fc] dark:hover:bg-[#005a92] active:scale-95 transition-all shadow-xs"
+              className="px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#e8f0fe] text-[#1a73e8] dark:bg-[#004a77] dark:text-[#c2e7ff] hover:bg-[#d2e3fc] dark:hover:bg-[#005a92] active:scale-95 transition-all shadow-xs"
             >
               +1:00
             </button>
             <button
               onClick={() => handleAddQuickTime(300)}
-              className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#e8f0fe] text-[#1a73e8] dark:bg-[#004a77] dark:text-[#c2e7ff] hover:bg-[#d2e3fc] dark:hover:bg-[#005a92] active:scale-95 transition-all shadow-xs"
+              className="px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#e8f0fe] text-[#1a73e8] dark:bg-[#004a77] dark:text-[#c2e7ff] hover:bg-[#d2e3fc] dark:hover:bg-[#005a92] active:scale-95 transition-all shadow-xs"
             >
               +5:00
+            </button>
+            <button
+              onClick={handleClear}
+              disabled={isZero}
+              className="px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-100 dark:disabled:hover:bg-gray-700 active:scale-95 transition-all shadow-xs"
+              title="Clear timer to 0:00"
+            >
+              Clear
             </button>
           </div>
         </div>
@@ -142,7 +161,7 @@ export const TimerTab: React.FC<TimerTabProps> = ({
         {/* Bottom Action Bar: Full-width blue pill button (Google style) */}
         <div className="w-full flex items-center gap-3 mt-6">
           {/* Reset button (visible when running, paused, or time has changed) */}
-          {(activeTimer?.isRunning || activeTimer?.remainingSeconds !== activeTimer?.totalSeconds) && (
+          {(activeTimer?.isRunning || (activeTimer?.remainingSeconds !== activeTimer?.totalSeconds && !isZero)) && (
             <button
               onClick={handleReset}
               className="flex items-center justify-center p-3 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors shrink-0"
@@ -156,9 +175,12 @@ export const TimerTab: React.FC<TimerTabProps> = ({
           {/* Main Primary Blue Pill Button */}
           <button
             onClick={handlePlayPause}
-            className={`flex-1 py-3.5 sm:py-4 rounded-full flex items-center justify-center text-white transition-all shadow-md active:scale-[0.99] ${
+            disabled={isZero}
+            className={`flex-1 py-3.5 sm:py-4 rounded-full flex items-center justify-center text-white transition-all shadow-md active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 ${
               activeTimer?.isRunning
                 ? 'bg-[#1557b0] dark:bg-[#1a73e8] hover:bg-[#124b99]'
+                : isZero
+                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-none'
                 : 'bg-[#1a73e8] dark:bg-[#8ab4f8] dark:text-gray-900 hover:bg-[#1557b0]'
             }`}
             aria-label={activeTimer?.isRunning ? 'Pause Timer' : 'Start Timer'}
@@ -196,7 +218,8 @@ export const TimerTab: React.FC<TimerTabProps> = ({
           {timers.map((t) => {
             const isSelected = t.id === activeTimerId;
             const tFormatted = formatSeconds(t.remainingSeconds);
-            const tPercent = t.totalSeconds > 0 ? (t.remainingSeconds / t.totalSeconds) * 100 : 100;
+            const tPercent = t.totalSeconds > 0 ? (t.remainingSeconds / t.totalSeconds) * 100 : 0;
+            const isTZero = t.remainingSeconds === 0 && t.totalSeconds === 0;
 
             return (
               <div
@@ -265,12 +288,15 @@ export const TimerTab: React.FC<TimerTabProps> = ({
                       vibrationService.tap();
                       onToggleTimer(t.id);
                     }}
-                    className={`p-2 rounded-full transition-colors ${
+                    disabled={isTZero}
+                    className={`p-2 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                       t.isRunning
                         ? 'bg-blue-600 text-white'
+                        : isTZero
+                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200'
                     }`}
-                    title={t.isRunning ? 'Pause' : 'Start'}
+                    title={t.isRunning ? 'Pause' : isTZero ? 'Set time to start' : 'Start'}
                   >
                     {t.isRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                   </button>

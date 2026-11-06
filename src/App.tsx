@@ -171,6 +171,7 @@ export function App() {
     setTimers((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
+        if (t.remainingSeconds <= 0 && t.totalSeconds <= 0) return t;
         const willRun = !t.isRunning;
         if (willRun && t.remainingSeconds <= 0) {
           return { ...t, remainingSeconds: t.totalSeconds, isRunning: true };
@@ -183,6 +184,16 @@ export function App() {
   const handleResetTimer = (id: string) => {
     setTimers((prev) =>
       prev.map((t) => (t.id === id ? { ...t, remainingSeconds: t.totalSeconds, isRunning: false } : t))
+    );
+  };
+
+  const handleClearTimer = (id: string) => {
+    setTimers((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, remainingSeconds: 0, totalSeconds: 0, isRunning: false }
+          : t
+      )
     );
   };
 
@@ -329,6 +340,7 @@ export function App() {
             setActiveTimerId={setActiveTimerId}
             onToggleTimer={handleToggleTimer}
             onResetTimer={handleResetTimer}
+            onClearTimer={handleClearTimer}
             onAddSeconds={handleAddSeconds}
             onCreateTimer={handleCreateTimer}
             onUpdateTimer={handleUpdateTimer}
