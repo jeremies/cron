@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased m-0 p-0 font-sans selection:bg-blue-100 dark:selection:bg-blue-900;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+}
+
+@keyframes bounce-short {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-bounce-short {
+  animation: bounce-short 1.5s infinite ease-in-out;
+}
