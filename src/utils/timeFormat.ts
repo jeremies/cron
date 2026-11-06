@@ -91,3 +91,4 @@ export function getTimeUntilAlarm(alarmTime: string, daysOfWeek: number[]): stri
   if (minutes === 0) return `in ${hours}h`;
   return `in ${hours}h ${minutes}m`;
 }
+

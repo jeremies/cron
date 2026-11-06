@@ -252,3 +252,4 @@ export const StopwatchTab: React.FC = () => {
     </div>
   );
 };
+

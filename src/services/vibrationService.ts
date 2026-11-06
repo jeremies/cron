@@ -63,3 +63,4 @@ class VibrationService {
 }
 
 export const vibrationService = new VibrationService();
+

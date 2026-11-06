@@ -107,3 +107,4 @@ npx cap run android
 ├── tailwind.config.js         # Tailwind theme configuration
 └── vite.config.ts             # Vite build configuration
 ```
+

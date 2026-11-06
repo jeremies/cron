@@ -240,3 +240,4 @@ export const AlarmModal: React.FC<AlarmModalProps> = ({
     </div>
   );
 };
+

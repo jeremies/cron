@@ -40,3 +40,4 @@ export interface RingingEvent {
   sound: SoundType;
   snoozeMinutes?: number;
 }
+
