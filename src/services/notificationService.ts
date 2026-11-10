@@ -99,7 +99,6 @@ class NotificationService {
           body: body,
           icon: '/favicon.ico',
           vibrate: [200, 100, 200],
-          requireInteraction: true
         } as NotificationOptions);
       }
     } catch (err) {
